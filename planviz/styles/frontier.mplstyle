@@ -1,0 +1,53 @@
+# Frontier — matplotlib style for openplan-labs figures.
+# Source of truth: openplan-labs/branding · brand/figures.md
+#   plt.style.use("tokens/frontier.mplstyle")
+#
+# The categorical cycle is the AGENT ramp, not the semantic trio.
+# --color-path / frontier / expanded mean specific things; set them
+# explicitly per artist rather than letting the cycler assign them.
+
+figure.facecolor      : f2f4f6
+figure.edgecolor      : f2f4f6
+savefig.facecolor     : f2f4f6
+savefig.edgecolor     : f2f4f6
+savefig.dpi           : 200
+savefig.bbox          : tight
+
+axes.facecolor        : ffffff
+axes.edgecolor        : d9dfe4
+axes.linewidth        : 1.0
+axes.labelcolor       : 3c464e
+axes.titlecolor       : 14181c
+axes.grid             : True
+axes.grid.axis        : y
+axes.spines.top       : False
+axes.spines.right     : False
+axes.axisbelow        : True
+axes.titlesize        : 12
+axes.titleweight      : semibold
+axes.labelsize        : 10
+axes.prop_cycle       : cycler('color', ['3d6d8f', '4f8a7b', '7a6f9c', '8a6d5a', '5b7f9e', '6b9a8b', '8f7fae', '9c7f6a'])
+
+grid.color            : d9dfe4
+grid.linewidth        : 0.6
+grid.alpha            : 0.9
+
+xtick.color           : 5e6a73
+ytick.color           : 5e6a73
+xtick.labelsize       : 9
+ytick.labelsize       : 9
+xtick.direction       : out
+ytick.direction       : out
+
+text.color            : 3c464e
+font.family           : sans-serif
+font.sans-serif       : Libre Franklin, Helvetica Neue, Helvetica, DejaVu Sans
+font.size             : 10
+
+legend.frameon        : False
+legend.fontsize       : 9
+
+lines.linewidth       : 2.0
+lines.solid_capstyle  : round
+lines.solid_joinstyle : round
+lines.markersize      : 5

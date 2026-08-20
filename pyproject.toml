@@ -1,0 +1,91 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "planviz"
+description = "Frontier-styled matplotlib figures for planning and search: grid maps, search animations, plan timelines, and benchmark charts"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Erwin Lejeune", email = "erwin.lejeune15@gmail.com" }]
+keywords = [
+    "visualization",
+    "matplotlib",
+    "planning",
+    "search",
+    "mapf",
+    "pddl",
+    "robotics",
+    "benchmark",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Framework :: Matplotlib",
+]
+# matplotlib and numpy are the whole dependency set on purpose: this package
+# is meant to be safe to depend on from a solver library, which should not
+# inherit a plotting stack it did not ask for.
+dependencies = ["matplotlib>=3.7", "numpy>=1.24"]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+# GIF writing needs pillow; MP4 needs an ffmpeg binary, and imageio-ffmpeg
+# bundles one so `save_animation(..., "x.mp4")` works with no system install.
+animation = ["pillow>=9.0", "imageio-ffmpeg>=0.4"]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.4",
+    "pillow>=9.0",
+    "build>=1.0",
+    "twine>=5.0",
+]
+docs = ["mkdocs-material>=9.5", "mkdocstrings[python]>=0.24"]
+
+[project.urls]
+Homepage = "https://github.com/openplan-labs/planviz"
+Documentation = "https://openplan-labs.github.io/planviz/"
+Source = "https://github.com/openplan-labs/planviz"
+Changelog = "https://github.com/openplan-labs/planviz/blob/main/CHANGELOG.md"
+Issues = "https://github.com/openplan-labs/planviz/issues"
+
+[tool.hatch.version]
+path = "planviz/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["planviz"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    ".github/**",
+    "docs/**",
+    "site/**",
+    "mkdocs.yml",
+]
+
+# Docstring examples are part of the contract: every public function carries
+# one, and pytest runs them.
+[tool.pytest.ini_options]
+testpaths = ["tests", "planviz"]
+addopts = "--doctest-modules"
+# Several tests build an animation to inspect its artists without rendering
+# it, which is exactly what this warning is for. It is noise here.
+filterwarnings = [
+    "ignore:Animation was deleted without rendering anything:UserWarning",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
