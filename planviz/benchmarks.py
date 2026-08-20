@@ -284,6 +284,11 @@ def success_heatmap(
         cmap = LinearSegmentedColormap.from_list(
             "coverage", [tokens.path, tokens.expanded], N=256
         )
+        # An unmeasured cell takes ``line`` — the same value as an obstacle,
+        # because it is structure rather than data. Left transparent it shows
+        # the panel through, which on a warm-to-cool ramp reads as a value.
+        cmap = cmap.copy()
+        cmap.set_bad(tokens.line)
         ax.imshow(
             np.ma.masked_invalid(values),
             cmap=cmap,

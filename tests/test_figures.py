@@ -207,6 +207,12 @@ def test_success_heatmap(dark, tmp_path):
     )
     texts = {text.get_text() for text in ax.texts}
     assert "—" in texts, "an unmeasured cell must not read as zero"
+    # ...and must not read as a value either: it takes `line`, the obstacle
+    # colour, because it is structure rather than data.
+    import matplotlib.colors as mcolors
+
+    tokens = planviz.tokens.get(dark)
+    assert mcolors.to_hex(ax.images[0].cmap.get_bad()) == tokens.line
     _rendered(ax, tmp_path, f"success-{dark}")
 
 
