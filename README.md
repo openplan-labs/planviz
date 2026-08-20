@@ -160,7 +160,7 @@ Full signatures: [API reference](https://openplan-labs.github.io/planviz/api/).
   repositories with different problem types.
 - **No grouped-bar chart and no parity scatter** yet. `pymapf`'s
   `plot_cost_comparison` and `cuplan`'s `_fig_quality` have no home here in
-  0.1.0; see [migration](https://openplan-labs.github.io/planviz/migration/).
+  1.0.0; see [migration](https://openplan-labs.github.io/planviz/migration/).
 - **No 3-D space-time cube.** `pymapf.viz.plot_spacetime` stays where it is.
 - **No live views.** `LiveSolveView` and jupyddl's `LiveSearchPlot` are solver
   observers, not figures; they belong with the solver they observe.

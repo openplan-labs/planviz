@@ -58,7 +58,7 @@ from .search import (
 from .style import STYLE_PATH, style_context, use_style
 from .tokens import AGENT_RAMP, DARK, LIGHT, Tokens
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 __all__ = [
     "__version__",

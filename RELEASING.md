@@ -75,9 +75,9 @@ where a version number can be spent freely.
 6. Commit, then tag and push:
 
    ```sh
-   git commit -am "Release 0.1.0"
-   git tag v0.1.0
-   git push origin main v0.1.0
+   git commit -am "Release 1.0.0"
+   git tag v1.0.0
+   git push origin main v1.0.0
    ```
 
 The workflow then builds the sdist and wheel, fails if the tag disagrees with

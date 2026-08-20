@@ -91,7 +91,7 @@ def plot_scenario(scenario, ax=None, dark=False, title=None):
 | `plot_scaling(report, y=, x=, log_y=)` | `scaling_curve(series, log_y=, xlabel=, ylabel=)` | Build `series` as `{algorithm: {x: [values across instances]}}` instead of calling `aggregate(report, ...)`; `scaling_curve` does the median and adds the min–max band pymapf never had. |
 | `plot_cost_curve(traces)` | `search_progress({label: trace.cost_curve()}, xlabel="expanded node", ylabel="sum of costs")` | Direct replacement, including the end-of-line direct labels. |
 | `plot_success_rate(report)` | **partial** — `success_heatmap` covers a two-axis sweep, not one bar per algorithm. Either keep the local `barh`, styled from `planviz.tokens`, or reshape it into a one-row heatmap. |
-| `plot_cost_comparison(report)` | **no equivalent** — grouped bars per scenario. Keep locally, styled from `planviz.tokens`. Tracked as a 0.2 candidate. |
+| `plot_cost_comparison(report)` | **no equivalent** — grouped bars per scenario. Keep locally, styled from `planviz.tokens`. Tracked as a 1.1 candidate. |
 | `dashboard(scaling, comparison)` | `plt.subplots(2, 2)` + four `planviz` calls with `ax=` | The one place a dashboard belongs is the repository that knows what belongs on it. |
 
 ### Theme — `pymapf/viz/theme.py`
@@ -146,7 +146,7 @@ aggregation that `planviz` now owns.
 | `_fig_phases`, `_fig_prioritized_phases` | `phase_breakdown(medians, order=["kernel", "h2d", "d2h", "host"], accent="kernel", neutral=["host"], ax=)` — the totals above the bars and the `1.14` headroom come with it |
 | `_fig_throughput` | `throughput_curve(series, highlight="cuplan-cuda", ax=axes[i])` per panel |
 | `_fig_crossover` | `crossover_plot(ratios, highlight=..., ax=axes[i])` — the parity `axhline` in `faint` is drawn for you |
-| `_fig_quality` | **no equivalent** — the parity scatter (cost/makespan against pymapf, plus the CPU-vs-CUDA identity check). Keep locally, styled from `planviz.tokens`. Tracked as a 0.2 candidate. |
+| `_fig_quality` | **no equivalent** — the parity scatter (cost/makespan against pymapf, plus the CPU-vs-CUDA identity check). Keep locally, styled from `planviz.tokens`. Tracked as a 1.1 candidate. |
 | `_note_lost` | keep. It is a data-provenance annotation ("this arm was lost to a device fault"), not a figure primitive, and only `cuplan` knows when it applies. |
 | `_series_colors` (mapping `cuplan-cuda` to the path accent) | `highlight="cuplan-cuda"` |
 | `render_all(data, out_dirs)` | unchanged in shape — still loops `for dark in (False, True)` and writes `<name>{-dark}.png`; the body just calls `planviz` |
@@ -286,8 +286,8 @@ arguing for.
 ## Known gaps
 
 Three figures in the existing repositories have no `planviz` equivalent in
-0.1.0. All three are honest gaps rather than oversights, and all three are
-candidates for 0.2:
+1.0.0. All three are honest gaps rather than oversights, and all three are
+candidates for 1.1:
 
 | Gap | Wanted by | Shape |
 | :--- | :--- | :--- |

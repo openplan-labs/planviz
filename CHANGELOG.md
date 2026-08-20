@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format is based
 on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.1.0] - 2026-08-21
+## [1.0.0] - 2026-08-21
 
 Initial release. Extracts the figure code duplicated across
 [pymapf](https://github.com/openplan-labs/pymapf)'s `viz` package and
@@ -44,7 +44,7 @@ Deliberate gaps, named so nobody looks for them:
 
 - **Grouped bars** (`pymapf.plot_cost_comparison`,
   `jupyddl.plot_planner_comparison`) and a **parity scatter**
-  (`cuplan._fig_quality`). Both are 0.2 candidates.
+  (`cuplan._fig_quality`). Both are 1.1 candidates.
 - **A 3-D space-time cube** (`pymapf.plot_spacetime`).
 - **Live views.** `LiveSolveView` and `LiveSearchPlot` are solver observers,
   not figures, and belong with the solver they observe.
@@ -54,4 +54,4 @@ Deliberate gaps, named so nobody looks for them:
   solution". A failed run is drawn as a mark — a hatched bar, an em dash, a
   hollow timeout triangle — not as a red.
 
-[0.1.0]: https://github.com/openplan-labs/planviz/releases/tag/v0.1.0
+[1.0.0]: https://github.com/openplan-labs/planviz/releases/tag/v1.0.0
