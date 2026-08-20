@@ -371,7 +371,12 @@ def draw_paths(
                     markeredgecolor=tokens.bg_raised, markeredgewidth=1.0,
                     zorder=top + 1, **MARKS["goal"],
                 )
-            if labels and not crowded:
+            # With one agent as the subject, labelling the context agents
+            # just adds ink to the thing the figure is deliberately quieting.
+            named = labels and not crowded and (
+                highlight is None or name == highlight
+            )
+            if named:
                 ax.annotate(
                     name,
                     (xs[0], ys[0]),

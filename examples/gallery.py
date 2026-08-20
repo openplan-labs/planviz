@@ -81,18 +81,24 @@ def _figures(dark: bool) -> dict[str, Callable[[], object]]:
             dark=dark,
             title="One agent is the subject; the rest are context",
         ),
+        # The flood, not the maze: a corridor search keeps one node on the
+        # open list at a time, so its frontier panel has nothing to show.
         "search-progress": lambda: planviz.search_panels(
             {
                 "f, g and h per expansion": {
-                    key: search["series"][key] for key in ("f", "g", "h")
+                    key: flood["series"][key] for key in ("f", "g", "h")
                 },
-                "open list size": {"|open|": search["series"]["open"]},
+                "open list size": {"|open|": flood["series"]["open"]},
             },
             dark=dark,
             fill=["open list size"],
-            ylabels={"f, g and h per expansion": "cost"},
+            ylabels={
+                "f, g and h per expansion": "cost",
+                "open list size": "nodes",
+            },
             suptitle=(
-                f"A* on a 21 x 21 maze — {len(search['expanded'])} expansions"
+                f"Weighted A* on an 18 x 28 warehouse — "
+                f"{len(flood['expanded'])} expansions"
             ),
         ),
         # A weighted A* over open floor, not the maze: a corridor search puts

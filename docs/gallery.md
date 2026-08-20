@@ -135,8 +135,8 @@ planviz.search_panels(
         "open list size": {"|open|": opens},
     },
     fill=["open list size"],
-    ylabels={"f, g and h per expansion": "cost"},
-    suptitle="A* on a 21 x 21 maze — 93 expansions",
+    ylabels={"f, g and h per expansion": "cost", "open list size": "nodes"},
+    suptitle="Weighted A* on an 18 x 28 warehouse — 383 expansions",
 )
 ```
 
