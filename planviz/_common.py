@@ -14,20 +14,25 @@ they are the reason figures from different modules read as one system:
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from typing import Any
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from .tokens import Tokens
 
+if TYPE_CHECKING:  # pragma: no cover - annotations only
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
+
 
 def axes(
-    ax,
+    ax: Axes | None,
     tokens: Tokens,
     figsize: tuple[float, float] | None = None,
     *,
     polar: bool = False,
-):
+) -> tuple[Figure, Axes]:
     """Return ``(figure, ax)``, creating the axes when ``ax`` is ``None``."""
     import matplotlib.pyplot as plt
 
@@ -41,7 +46,7 @@ def axes(
     return figure, ax
 
 
-def style_axes(ax, tokens: Tokens, *, grid_axis: str | None = "y") -> None:
+def style_axes(ax: Axes, tokens: Tokens, *, grid_axis: str | None = "y") -> None:
     """Apply the brand's axis rules to ``ax``: hairlines, muted ticks, y-grid."""
     ax.set_facecolor(tokens.bg_raised)
     for side in ("top", "right"):
@@ -62,14 +67,14 @@ def style_axes(ax, tokens: Tokens, *, grid_axis: str | None = "y") -> None:
 
 
 def finish(
-    ax,
+    ax: Axes,
     tokens: Tokens,
     *,
     title: str | None = None,
     xlabel: str | None = None,
     ylabel: str | None = None,
     grid_axis: str | None = "y",
-):
+) -> Axes:
     """Apply axis styling and the optional title/labels; return ``ax``."""
     style_axes(ax, tokens, grid_axis=grid_axis)
     if title:
@@ -81,7 +86,7 @@ def finish(
     return ax
 
 
-def legend(ax, tokens: Tokens, **kwargs):
+def legend(ax: Axes, tokens: Tokens, **kwargs):
     """Draw a frameless legend in body ink, or nothing if there are no labels."""
     handles, labels = ax.get_legend_handles_labels()
     if not handles:
@@ -92,7 +97,7 @@ def legend(ax, tokens: Tokens, **kwargs):
     )
 
 
-def caption(ax, tokens: Tokens, text: str, *, y: float = -0.16) -> None:
+def caption(ax: Axes, tokens: Tokens, text: str, *, y: float = -0.16) -> None:
     """Write a muted caption under the axes — conditions, units, or a warning."""
     ax.annotate(
         text,
@@ -180,7 +185,7 @@ def series_colors(
     return colors
 
 
-def save(figure_or_ax, path, dpi: int = 200):
+def save(figure_or_ax: Figure | Axes, path: str | Path, dpi: int = 200) -> Path:
     """Save a figure (or the figure owning an axes) and return the path.
 
     Figure functions never save on their own — this is the explicit call.
@@ -192,8 +197,6 @@ def save(figure_or_ax, path, dpi: int = 200):
         >>> os.path.getsize(out) > 0
         True
     """
-    from pathlib import Path
-
     figure = getattr(figure_or_ax, "figure", figure_or_ax)
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)

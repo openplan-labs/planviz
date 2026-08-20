@@ -20,13 +20,17 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from . import _common
 from .style import style_context
 from .tokens import Tokens
+
+if TYPE_CHECKING:  # pragma: no cover - annotations only
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
 
 __all__ = [
     "search_progress",
@@ -83,7 +87,7 @@ def search_progress(
     series: Mapping[str, Sequence[float]],
     *,
     x: Sequence[float] | None = None,
-    ax=None,
+    ax: Axes | None = None,
     dark: bool = False,
     highlight: str | None = None,
     marks: Sequence[float] | None = None,
@@ -95,7 +99,7 @@ def search_progress(
     ylabel: str | None = None,
     title: str | None = None,
     figsize: tuple[float, float] | None = None,
-):
+) -> Axes:
     """Plot one line per named series against search progress.
 
     Use it for ``f``/``g``/``h`` over expansions, for the open-list size, for
@@ -172,7 +176,7 @@ def search_panels(
     ylabels: Mapping[str, str] | None = None,
     suptitle: str | None = None,
     figsize: tuple[float, float] | None = None,
-):
+) -> Figure:
     """Lay several :func:`search_progress` panels on one figure.
 
     One idea per panel, one figure per search. The panels share a colour
@@ -309,12 +313,12 @@ def radial_wavefront(
     goal: int | None = None,
     max_nodes: int = 4000,
     edges: bool = True,
-    ax=None,
+    ax: Axes | None = None,
     dark: bool = False,
     value_label: str = "heuristic",
     title: str | None = None,
     figsize: tuple[float, float] | None = None,
-):
+) -> Axes:
     """Draw the search tree in polar coordinates — depth is radius.
 
     Nodes at the same depth are spread evenly around their ring, so the shape
@@ -533,7 +537,7 @@ def _steps(plan: Iterable) -> list[Step]:
 def plan_timeline(
     plan: Iterable,
     *,
-    ax=None,
+    ax: Axes | None = None,
     dark: bool = False,
     highlight: str | int | None = None,
     max_steps: int = 60,
@@ -541,7 +545,7 @@ def plan_timeline(
     xlabel: str = "time",
     title: str | None = None,
     figsize: tuple[float, float] | None = None,
-):
+) -> Axes:
     """Draw a plan as a timeline — one bar per step, one lane per actor.
 
     Two shapes fall out of the same function. Give every step its own lane
@@ -698,8 +702,12 @@ def timeline_from_paths(paths: Any, *, wait_label: str = "wait") -> list[Step]:
         >>> steps = planviz.timeline_from_paths(
         ...     {"a": [(0, 0), (0, 1), (0, 1), (0, 2)], "b": [(1, 0), (1, 1)]}
         ... )
-        >>> [(s.row, s.kind, s.start, s.duration) for s in steps if s.row == "a"]
-        [('a', 'action', 0.0, 1.0), ('a', 'wait', 1.0, 1.0), ('a', 'action', 2.0, 1.0)]
+        >>> for step in steps:
+        ...     if step.row == "a":
+        ...         print(step.kind, step.start, step.duration)
+        action 0.0 1.0
+        wait 1.0 1.0
+        action 2.0 1.0
     """
     routes = _common.as_paths(paths)
     horizon = max(len(path) for path in routes.values()) - 1

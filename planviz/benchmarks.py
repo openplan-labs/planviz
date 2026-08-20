@@ -20,13 +20,16 @@ from __future__ import annotations
 
 import statistics
 from collections.abc import Iterable, Mapping, Sequence
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from . import _common
 from .style import style_context
 from .tokens import Tokens
+
+if TYPE_CHECKING:  # pragma: no cover - annotations only
+    from matplotlib.axes import Axes
 
 __all__ = [
     "scaling_curve",
@@ -101,7 +104,7 @@ def scaling_curve(
     series: Mapping[str, Any],
     *,
     x: Sequence[float] | None = None,
-    ax=None,
+    ax: Axes | None = None,
     dark: bool = False,
     highlight: str | None = None,
     band: bool = True,
@@ -116,7 +119,7 @@ def scaling_curve(
     ylabel: str = "wall time (s)",
     title: str | None = None,
     figsize: tuple[float, float] | None = None,
-):
+) -> Axes:
     """Plot cost against problem size — one line per backend or planner.
 
     Each line is the **median over seeds** with a min–max band, which is the
@@ -212,7 +215,7 @@ def success_heatmap(
     *,
     x_labels: Sequence[str] | None = None,
     y_labels: Sequence[str] | None = None,
-    ax=None,
+    ax: Axes | None = None,
     dark: bool = False,
     annotate: bool = True,
     vmin: float = 0.0,
@@ -223,7 +226,7 @@ def success_heatmap(
     ylabel: str = "obstacle density",
     title: str | None = None,
     figsize: tuple[float, float] | None = None,
-):
+) -> Axes:
     """Draw coverage over a two-axis sweep — how often the solver succeeded.
 
     The ramp runs ``path`` (warm, nothing solved) to ``expanded`` (cool, all
@@ -324,7 +327,7 @@ def phase_breakdown(
     order: Sequence[str] | None = None,
     accent: str | None = None,
     neutral: Iterable[str] = (),
-    ax=None,
+    ax: Axes | None = None,
     dark: bool = False,
     normalize: bool = True,
     totals: bool = True,
@@ -334,7 +337,7 @@ def phase_breakdown(
     ylabel: str | None = None,
     title: str | None = None,
     figsize: tuple[float, float] | None = None,
-):
+) -> Axes:
     """Stack where the wall time went, one bar per configuration.
 
     Bands are separated by **hatch as well as hue**. Four cool blues in a
@@ -462,7 +465,7 @@ def throughput_curve(
     series: Mapping[str, Any],
     *,
     x: Sequence[float] | None = None,
-    ax=None,
+    ax: Axes | None = None,
     dark: bool = False,
     highlight: str | None = None,
     band: bool = True,
@@ -475,7 +478,7 @@ def throughput_curve(
     title: str | None = None,
     note: str | None = "a rising line means the device is not yet saturated",
     figsize: tuple[float, float] | None = None,
-):
+) -> Axes:
     """Plot throughput against batch size — the saturation picture.
 
     Same data shape as :func:`scaling_curve`, different question. Wall time
@@ -539,7 +542,7 @@ def crossover_plot(
     ratios: Mapping[str, Any],
     *,
     x: Sequence[float] | None = None,
-    ax=None,
+    ax: Axes | None = None,
     dark: bool = False,
     highlight: str | None = None,
     baseline: float = 1.0,
@@ -552,7 +555,7 @@ def crossover_plot(
     ylabel: str = "baseline time ÷ candidate time",
     title: str | None = None,
     figsize: tuple[float, float] | None = None,
-):
+) -> Axes:
     """Plot speedup ratios and the size at which the ranking flips.
 
     A crossover chart is the only honest way to answer "is the GPU faster?" —

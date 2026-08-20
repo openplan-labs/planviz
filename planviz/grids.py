@@ -8,6 +8,7 @@ Three pictures, in the order a reader meets them:
   (filled dot, hollow ring, connected stroke) is the brand's canonical figure
   and the one most worth copying.
 * :func:`draw_paths` — what it returned, for many agents at once.
+* :func:`draw_heatmap` — a magnitude per cell: congestion, visit counts, cost.
 
 Grids are indexed ``[row][col]`` with row 0 at the top, and cells are drawn at
 integer coordinates, so ``(0, 0)`` is the top-left cell centre. Nothing here
@@ -19,7 +20,7 @@ array-like where truthy means blocked, and a path is any sequence of
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -27,7 +28,10 @@ from . import _common
 from .style import style_context
 from .tokens import Tokens
 
-__all__ = ["draw_grid", "draw_paths", "draw_search", "MARKS"]
+if TYPE_CHECKING:  # pragma: no cover - annotations only
+    from matplotlib.axes import Axes
+
+__all__ = ["draw_grid", "draw_heatmap", "draw_paths", "draw_search", "MARKS"]
 
 #: The legend from ``branding/brand/figures.md``, as matplotlib keyword sets.
 #: Radii there are in points; matplotlib's ``markersize`` is a diameter.
@@ -135,16 +139,96 @@ def _cells(points: Iterable | None) -> np.ndarray:
     return array
 
 
+def draw_heatmap(
+    values: Any,
+    grid: Any = None,
+    *,
+    ax: Axes | None = None,
+    dark: bool = False,
+    label: str | None = None,
+    colorbar: bool = True,
+    vmax: float | None = None,
+    title: str | None = None,
+    figsize: tuple[float, float] | None = None,
+) -> Axes:
+    """Shade each cell of a grid by a magnitude — congestion, visits, cost.
+
+    The ramp is the single-hue ``expanded`` → ``path`` sequential map: warm is
+    expensive, which is the same claim the accent makes everywhere else in the
+    system. Never a rainbow, and never a diverging map for a quantity that has
+    no meaningful midpoint.
+
+    Blocked cells are drawn as obstacles, not as zero. A cell no agent could
+    enter and a cell no agent chose to enter are different facts.
+
+    Args:
+        values: 2-D array-like of magnitudes, same shape as ``grid``.
+        grid: occupancy grid; blocked cells are masked out of the ramp.
+        ax: draw into this axes instead of creating one.
+        dark: use the dark scheme.
+        label: colourbar label — say the unit.
+        colorbar: draw the colourbar.
+        vmax: top of the ramp; defaults to the largest value present.
+        title: axes title.
+        figsize: overrides the size derived from the grid's aspect.
+
+    Returns:
+        The :class:`~matplotlib.axes.Axes` drawn on.
+
+    Example:
+        >>> import matplotlib; matplotlib.use("Agg")
+        >>> import planviz
+        >>> ax = planviz.draw_heatmap(
+        ...     [[0, 2, 0], [1, 5, 1], [0, 3, 0]],
+        ...     grid=[[0, 0, 0], [0, 0, 0], [1, 0, 0]],
+        ...     label="agent-timesteps",
+        ... )
+        >>> len(ax.images)
+        1
+    """
+    magnitudes = np.asarray(values, dtype=float)
+    if magnitudes.ndim != 2:
+        raise ValueError("values must be 2-D indexed [row][col]")
+
+    with style_context(dark) as tokens:
+        _, ax = _map_axes(ax, tokens, magnitudes.shape, figsize)
+        blocked = (
+            _common.occupancy(grid)
+            if grid is not None
+            else np.zeros(magnitudes.shape, dtype=bool)
+        )
+        cmap = tokens.sequential().copy()
+        cmap.set_bad(tokens.line)
+        peak = float(vmax if vmax is not None else np.nanmax(magnitudes)) or 1.0
+        image = ax.imshow(
+            np.ma.masked_where(blocked, magnitudes),
+            cmap=cmap,
+            vmin=0,
+            vmax=peak,
+            extent=_extent(magnitudes.shape),
+            interpolation="nearest",
+            zorder=1,
+        )
+        if colorbar:
+            bar = ax.figure.colorbar(image, ax=ax, fraction=0.046, pad=0.03)
+            bar.outline.set_visible(False)
+            bar.ax.tick_params(colors=tokens.muted, labelsize=8)
+            if label:
+                bar.set_label(label, color=tokens.body, fontsize=9)
+        _title(ax, tokens, title)
+    return ax
+
+
 def draw_grid(
     grid: Any = None,
     *,
     shape: tuple[int, int] | None = None,
-    ax=None,
+    ax: Axes | None = None,
     dark: bool = False,
     title: str | None = None,
     lattice: bool = False,
     figsize: tuple[float, float] | None = None,
-):
+) -> Axes:
     """Draw an occupancy grid: blocked cells filled, nothing else.
 
     No lattice is drawn by default. The cells *are* the grid, and a lattice
@@ -192,7 +276,7 @@ def draw_paths(
     grid: Any = None,
     *,
     shape: tuple[int, int] | None = None,
-    ax=None,
+    ax: Axes | None = None,
     dark: bool = False,
     highlight: str | None = None,
     labels: bool = True,
@@ -200,7 +284,7 @@ def draw_paths(
     endpoints: bool = True,
     title: str | None = None,
     figsize: tuple[float, float] | None = None,
-):
+) -> Axes:
     """Draw multi-agent routes over a grid — one stroke per agent.
 
     Colour comes from the agent ramp by **stable index**, so re-rendering with
@@ -319,12 +403,12 @@ def draw_search(
     start: tuple[int, int] | None = None,
     goal: tuple[int, int] | None = None,
     unvisited: bool = True,
-    ax=None,
+    ax: Axes | None = None,
     dark: bool = False,
     legend: bool = True,
     title: str | None = None,
     figsize: tuple[float, float] | None = None,
-):
+) -> Axes:
     """Draw the three sets of a search: closed list, open list, and solution.
 
     This is the organisation's canonical figure. The three sets differ by

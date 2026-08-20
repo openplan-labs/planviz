@@ -45,6 +45,14 @@ def test_draw_grid_from_shape_only(dark):
     assert ax.get_xlim() == (-0.5, 6.5)
 
 
+def test_draw_heatmap_masks_obstacles(dark, tmp_path):
+    values = [[float(r * c) for c in range(6)] for r in range(6)]
+    ax = planviz.draw_heatmap(values, GRID, dark=dark, label="visits")
+    assert len(ax.images) == 1
+    assert ax.images[0].get_array().mask.any(), "blocked cells must be masked"
+    _rendered(ax, tmp_path, f"heatmap-{dark}")
+
+
 def test_draw_paths(dark, tmp_path):
     ax = planviz.draw_paths(PATHS, GRID, dark=dark, title="paths")
     assert isinstance(ax, Axes)

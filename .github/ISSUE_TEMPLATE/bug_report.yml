@@ -1,0 +1,50 @@
+name: Bug report
+description: A crash, or a figure that comes out wrong
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: >
+        What you drew, what you expected, what you got. For a figure that
+        renders but reads wrong, say which rule it breaks — sets separated by
+        hue alone, a silent log axis, a timeout drawn as a zero, the accent
+        spent on something that is not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: >
+        Smallest script that shows it, using synthetic data — a literal grid
+        and a literal path are usually enough. No solver required.
+      render: python
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: >
+        If the figure renders but looks wrong, attaching the PNG is worth more
+        than describing it.
+  - type: input
+    id: version
+    attributes:
+      label: planviz version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: >
+        Python version, matplotlib version, the backend
+        (`matplotlib.get_backend()`), and whether it happens in light, dark, or
+        both.
+      placeholder: |
+        Python 3.11, matplotlib 3.9.2, backend Agg
+        dark=True only
+    validations:
+      required: true

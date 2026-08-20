@@ -1,0 +1,223 @@
+name: Release
+
+# Publishing is driven by a tag: `git tag v0.1.0 && git push origin v0.1.0`.
+# The tag must match `planviz.__version__`; the build job fails the release if
+# it does not, so a mistyped tag cannot ship a mislabelled artifact.
+#
+# `workflow_dispatch` publishes to TestPyPI instead, for rehearsing a release
+# without burning a version number on the real index.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Index to publish to"
+        type: choice
+        options: [testpypi, none]
+        default: testpypi
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and check distributions
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: python -m pip install --upgrade build twine
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Check the tag matches planviz.__version__
+        id: version
+        run: |
+          version=$(python -c "import re,pathlib; print(re.search(r'__version__ = \"([^\"]+)\"', pathlib.Path('planviz/__init__.py').read_text()).group(1))")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "package version: $version"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            tag_version="${GITHUB_REF_NAME#v}"
+            if [ "$tag_version" != "$version" ]; then
+              echo "::error::tag ${GITHUB_REF_NAME} does not match planviz.__version__ ($version)"
+              exit 1
+            fi
+          fi
+
+      - name: Check metadata renders on PyPI
+        run: twine check --strict dist/*
+
+      - name: Check the wheel ships the vendored stylesheet
+        # The brand ships inside the wheel so consumers never look up the
+        # branding repository at runtime. A wheel without the stylesheet
+        # installs cleanly and then renders every figure unstyled, which is
+        # exactly the kind of break a release must not ship.
+        run: |
+          python - <<'PY'
+          import glob, sys, zipfile
+          wheel = glob.glob("dist/*.whl")[0]
+          shipped = set(zipfile.ZipFile(wheel).namelist())
+          expected = {
+              "planviz/styles/frontier.mplstyle",
+              "planviz/tokens.py",
+              "planviz/py.typed",
+          }
+          if missing := expected - shipped:
+              sys.exit(f"wheel is missing: {sorted(missing)}")
+          print(f"wheel ships {len(shipped)} files including the Frontier style")
+          PY
+
+      - name: Check the vendored tokens match the branding repository
+        # A release is the worst moment to discover the palette drifted: the
+        # figures a user renders are the ones this wheel carries, forever.
+        run: python scripts/sync_tokens.py --check
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  smoke-test:
+    name: Install the wheel (${{ matrix.python-version }})
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install from the built wheel and render a figure
+        # Runs outside the source tree so it imports the installed package,
+        # not the checkout — the only way to prove the wheel is self-contained.
+        run: |
+          python -m pip install dist/*.whl
+          cd "$(mktemp -d)"
+          python - <<'PY'
+          import matplotlib
+          matplotlib.use("Agg")
+          import matplotlib.pyplot as plt
+
+          import planviz
+
+          before = dict(plt.rcParams)
+          assert planviz.STYLE_PATH.is_file(), "the stylesheet did not ship"
+
+          for dark in (False, True):
+              ax = planviz.draw_search(
+                  expanded=[(0, 0), (1, 0), (2, 0)],
+                  frontier=[(0, 1), (2, 1)],
+                  path=[(0, 0), (1, 0), (2, 0), (2, 1)],
+                  grid=[[0, 0, 0], [0, 1, 0], [0, 0, 0]],
+                  dark=dark,
+              )
+              out = planviz.save(ax, f"search-{dark}.png")
+              assert out.stat().st_size > 1000, "rendered an empty figure"
+
+          assert repr(plt.rcParams["axes.facecolor"]) == repr(
+              before["axes.facecolor"]
+          ), "planviz leaked style into the caller's rcParams"
+
+          print(f"planviz {planviz.__version__}: tokens {planviz.tokens.SPEC_VERSION}")
+          PY
+
+  publish-pypi:
+    name: Publish to PyPI
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: [build, smoke-test]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/planviz/${{ needs.build.outputs.version }}
+    permissions:
+      # Trusted Publishing: PyPI verifies this workflow's OIDC identity, so
+      # the repository stores no API token at all.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-testpypi:
+    name: Publish to TestPyPI
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
+    needs: [build, smoke-test]
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/planviz/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          # A rehearsal must not fail because that version was already
+          # rehearsed.
+          skip-existing: true
+
+  github-release:
+    name: Create the GitHub release
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: publish-pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Extract this version's changelog section
+        run: |
+          python - <<'PY' > release-notes.md
+          import os, pathlib, re
+          version = os.environ["GITHUB_REF_NAME"].lstrip("v")
+          text = pathlib.Path("CHANGELOG.md").read_text()
+          match = re.search(
+              rf"^## \[{re.escape(version)}\].*?$(.*?)(?=^## \[|\Z)",
+              text,
+              re.MULTILINE | re.DOTALL,
+          )
+          print((match.group(1).strip() if match else f"See CHANGELOG.md for {version}."))
+          print()
+          print(f"Install: `pip install planviz=={version}`")
+          print(f"With GIF and MP4 writers: `pip install 'planviz[animation]=={version}'`")
+          PY
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: dist/*
+          body_path: release-notes.md
+          generate_release_notes: true

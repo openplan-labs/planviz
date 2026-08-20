@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    name: ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check .
+
+  test:
+    name: pytest (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e '.[dev,animation]'
+      # Renders every figure in both schemes and rasterizes each one, which is
+      # where a bad colour string or an unparsable hatch shows up. Docstring
+      # examples run too — they are the only documentation that can rot
+      # silently.
+      - run: pytest -q
+
+  tokens:
+    name: Brand tokens are in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # The palette is vendored into the wheel so consumers never look up a
+      # repository at runtime. The cost of vendoring is drift, and this is the
+      # guard: it fetches openplan-labs/branding and fails if what is
+      # committed here no longer matches what the brand says.
+      - run: python scripts/sync_tokens.py --check
+
+  gallery:
+    name: The gallery still renders
+    runs-on: ubuntu-latest
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e '.[animation]'
+      - run: python examples/gallery.py --out /tmp/gallery
+      # The committed images are what the README and docs show. If the script
+      # no longer produces one of them, the docs are referencing a figure that
+      # does not exist.
+      - name: Every committed image is still produced
+        run: |
+          python - <<'PY'
+          import pathlib, sys
+          produced = {p.name for p in pathlib.Path("/tmp/gallery").iterdir()}
+          committed = {p.name for p in pathlib.Path("docs/assets/gallery").iterdir()}
+          if missing := committed - produced:
+              sys.exit(f"no longer rendered: {sorted(missing)}")
+          if extra := produced - committed:
+              sys.exit(f"run `python examples/gallery.py` and commit: {sorted(extra)}")
+          print(f"{len(produced)} figures, light and dark")
+          PY
+
+  docs:
+    name: mkdocs build --strict
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e '.[docs]'
+      - run: mkdocs build --strict

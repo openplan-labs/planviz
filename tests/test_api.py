@@ -20,6 +20,9 @@ from tests.conftest import EXPANDED, FRONTIER, GRID, PATH, PATHS, PHASES, SERIES
 #: Every figure function, with a call that draws it on synthetic data.
 CALLS = {
     "draw_grid": lambda **kw: planviz.draw_grid(GRID, **kw),
+    "draw_heatmap": lambda **kw: planviz.draw_heatmap(
+        [[i + j for j in range(6)] for i in range(6)], GRID, **kw
+    ),
     "draw_paths": lambda **kw: planviz.draw_paths(PATHS, GRID, **kw),
     "draw_search": lambda **kw: planviz.draw_search(
         expanded=EXPANDED, frontier=FRONTIER, path=PATH, grid=GRID, **kw

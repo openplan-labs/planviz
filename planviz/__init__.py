@@ -46,7 +46,7 @@ from .benchmarks import (
     success_heatmap,
     throughput_curve,
 )
-from .grids import MARKS, draw_grid, draw_paths, draw_search
+from .grids import MARKS, draw_grid, draw_heatmap, draw_paths, draw_search
 from .search import (
     Step,
     plan_timeline,
@@ -74,6 +74,7 @@ __all__ = [
     "MARKS",
     # grids and agents
     "draw_grid",
+    "draw_heatmap",
     "draw_paths",
     "draw_search",
     "animate_paths",

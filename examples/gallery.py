@@ -64,6 +64,13 @@ def _figures(dark: bool) -> dict[str, Callable[[], object]]:
         "paths": lambda: planviz.draw_paths(
             agents, grid, dark=dark, title="Five agents, prioritized planning"
         ),
+        "congestion": lambda: planviz.draw_heatmap(
+            data.congestion(grid, crowd),
+            grid,
+            dark=dark,
+            label="agent-timesteps",
+            title="Congestion — where twelve plans queue up",
+        ),
         "paths-crowded": lambda: planviz.draw_paths(
             crowd, grid, dark=dark, title="Twelve agents — density, not hue"
         ),

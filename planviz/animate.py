@@ -16,13 +16,17 @@ they are read in a GitHub README on a train.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Any
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from . import _common
 from .grids import CROWD, MARKS, _draw_obstacles, _map_axes, _shape_of, _title
 from .style import style_context
+
+if TYPE_CHECKING:  # pragma: no cover - annotations only
+    from matplotlib.animation import FuncAnimation
 
 __all__ = [
     "animate_paths",
@@ -70,7 +74,7 @@ def animate_paths(
     title: str | None = None,
     figsize: tuple[float, float] | None = None,
     interval: int = 1000 // GIF_FPS,
-):
+) -> FuncAnimation:
     """Animate agents executing a multi-agent plan over a grid.
 
     Each agent glides between cells with an eased step, drags a short trail,
@@ -199,7 +203,7 @@ def animate_search(
     title: str | None = None,
     figsize: tuple[float, float] | None = None,
     interval: int = 1000 // GIF_FPS,
-):
+) -> FuncAnimation:
     """Animate a search: an accumulating closed list and a moving frontier.
 
     The expanded set never fades — it is the cost of the search. The path is
@@ -321,14 +325,14 @@ def animate_search(
 
 
 def save_animation(
-    animation,
-    path,
+    animation: FuncAnimation,
+    path: str | Path,
     *,
     fps: int = GIF_FPS,
     width_px: int = GIF_WIDTH_PX,
     dpi: int | None = None,
     bitrate: int = 3200,
-):
+) -> Path:
     """Write an animation to ``.gif`` (pillow) or ``.mp4`` (ffmpeg).
 
     For a GIF the defaults are the brand's README cap — 12 fps, 800 px wide —
@@ -356,8 +360,6 @@ def save_animation(
         >>> out.suffix
         '.gif'
     """
-    from pathlib import Path
-
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     figure = animation._fig  # the figure the animation was built on
@@ -389,7 +391,7 @@ def save_animation(
     return target
 
 
-def to_jshtml(animation) -> str:
+def to_jshtml(animation: FuncAnimation) -> str:
     """Return an HTML/JS player for the animation — what a notebook shows.
 
     Example:

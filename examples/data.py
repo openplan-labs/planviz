@@ -168,6 +168,15 @@ def routes(
     return out
 
 
+def congestion(grid: np.ndarray, paths: dict[str, list[Cell]]) -> np.ndarray:
+    """Return agent-timesteps per cell — where the plan queues up."""
+    counts = np.zeros(grid.shape, dtype=float)
+    for path in paths.values():
+        for row, col in path:
+            counts[int(row), int(col)] += 1
+    return counts
+
+
 def scaling(seed: int = 5) -> dict:
     """Return a synthetic three-backend sweep: ``{name: {agents: [seeds]}}``."""
     rng = random.Random(seed)

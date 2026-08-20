@@ -1,0 +1,36 @@
+name: Feature request
+description: A figure this library should be able to draw, or an API improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you are trying to draw
+      description: >
+        The picture, and the argument it makes. A figure type earns its place
+        here when more than one openplan-labs repository needs it — a
+        one-repository figure is usually better off staying there, styled from
+        `planviz.tokens`.
+    validations:
+      required: true
+  - type: textarea
+    id: shape
+    attributes:
+      label: Data shape
+      description: >
+        What the caller would pass. planviz imports no solver types, so the
+        input has to be an array, a sequence of (row, col) pairs, or a
+        mapping — say which.
+      render: python
+    validations:
+      required: false
+  - type: textarea
+    id: prior
+    attributes:
+      label: Where it exists today
+      description: >
+        Link the function in pymapf, cuda-planning or PythonPDDL if there is
+        one. The three known gaps are already listed in the changelog: grouped
+        bars, a parity scatter, and the 3-D space-time cube.
+    validations:
+      required: false

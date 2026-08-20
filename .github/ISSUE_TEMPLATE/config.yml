@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question / discussion
+    url: https://github.com/openplan-labs/planviz/discussions
+    about: Ask usage questions or discuss design here.
+  - name: The brand itself
+    url: https://github.com/openplan-labs/branding
+    about: Palette and figure rules live there. A colour change is a PR against that repository.

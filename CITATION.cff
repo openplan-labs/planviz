@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use planviz in your research, please cite it as below."
+title: "planviz: Frontier-styled figures for planning and search"
+type: software
+authors:
+  - family-names: Lejeune
+    given-names: Erwin
+    email: erwin.lejeune15@gmail.com
+repository-code: "https://github.com/openplan-labs/planviz"
+url: "https://openplan-labs.github.io/planviz/"
+license: MIT
+version: 0.1.0
+date-released: "2026-08-21"
+keywords:
+  - visualization
+  - matplotlib
+  - planning
+  - search
+  - multi-agent path finding
+  - MAPF
+  - PDDL
+  - benchmarking
