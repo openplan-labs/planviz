@@ -7,7 +7,7 @@
 
 [![CI](https://github.com/openplan-labs/planviz/actions/workflows/ci.yml/badge.svg)](https://github.com/openplan-labs/planviz/actions/workflows/ci.yml)
 [![docs](https://github.com/openplan-labs/planviz/actions/workflows/docs.yml/badge.svg)](https://openplan-labs.github.io/planviz/)
-[![PyPI](https://img.shields.io/badge/PyPI-not%20yet%20published-6d8298)](https://openplan-labs.github.io/planviz/install/)
+[![PyPI](https://img.shields.io/pypi/v/planviz?color=c2472c)](https://pypi.org/project/planviz/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-6d8298)](LICENSE)
 
 The figure library for [OpenPlan Labs](https://github.com/openplan-labs) —
@@ -41,8 +41,6 @@ pip install planviz
 
 Two dependencies, both of which a plotting library obviously needs:
 `matplotlib>=3.7` and `numpy>=1.24`. Python 3.10 or newer.
-
-> Not yet on PyPI — until then: `pip install git+https://github.com/openplan-labs/planviz`.
 
 GIF and MP4 writing needs a little more:
 

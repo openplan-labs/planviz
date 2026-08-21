@@ -53,26 +53,7 @@ where a version number can be spent freely.
    python examples/gallery.py && git add docs/assets/gallery
    ```
 
-5. **First release only** — the README and the install page currently tell the
-   truth about a package that is not on PyPI yet. Make them tell the truth
-   about one that is:
-
-   - Replace the placeholder badge
-
-     ```
-     [![PyPI](https://img.shields.io/badge/PyPI-not%20yet%20published-6d8298)](https://openplan-labs.github.io/planviz/install/)
-     ```
-
-     with the live one
-
-     ```
-     [![PyPI](https://img.shields.io/pypi/v/planviz?color=c2472c)](https://pypi.org/project/planviz/)
-     ```
-
-   - Delete the "Not yet on PyPI — until then: `pip install git+…`" line from
-     the README and the matching admonition in `docs/install.md`.
-
-6. Commit, then tag and push:
+5. Commit, then tag and push:
 
    ```sh
    git commit -am "Release 1.0.0"

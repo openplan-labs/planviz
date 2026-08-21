@@ -4,8 +4,9 @@
 pip install planviz
 ```
 
-!!! note "Not yet on PyPI"
-    Until the first release: `pip install git+https://github.com/openplan-labs/planviz`.
+!!! note
+    To track `main` instead of a release:
+    `pip install git+https://github.com/openplan-labs/planviz`.
 
 Python 3.10 or newer. Two hard dependencies, both of which a plotting library
 obviously needs:
